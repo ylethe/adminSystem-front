@@ -3,6 +3,7 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
+var fs = require('fs')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -19,6 +20,20 @@ const createLintingRule = () => ({
   }
 })
 
+function aliasProvider() {
+  let aliasObj = {
+    'vue$': 'vue/dist/vue.esm.js',
+  }
+  fs.readdirSync(resolve('src'))
+    .filter(fileName => fs.lstatSync(path.join(resolve('src'), fileName)).isDirectory())
+    .forEach(fileName => {
+      aliasObj[fileName] = path.join(resolve('src'), fileName)
+    })
+  return aliasObj
+}
+const alias = aliasProvider()
+
+
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
@@ -33,10 +48,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.vue', '.json'],
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
-    }
+    alias: alias
   },
   module: {
     rules: [

@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import api from './api'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '../static/css/index.less'
@@ -10,6 +11,7 @@ import '../static/css/index.less'
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+Vue.prototype.$api = api
 
 /* eslint-disable no-new */
 new Vue({

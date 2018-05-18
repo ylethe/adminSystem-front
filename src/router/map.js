@@ -9,34 +9,34 @@ export default [
     children: [
       {
         path: 'me',
-        name: '我的',
+        name: '我的主页',
         component: (resolve) => {
-          require(['../view/mine'], resolve)
+          require(['../views/mine'], resolve)
         }
       },
       {
-        path: 'me/add-task',
-        name: '添加任务',
+        path: 'me/task/add',
+        name: '任务添加',
         component: (resolve) => {
-          require(['../views/mine/taskAdd/index.vue'], resolve)
+          require(['../views/mine/taskAdd'], resolve)
         }
       },
       {
-        path: 'user/add',
+        path: 'staff/add',
         name: '添加员工',
         component: (resolve) => {
-          require(['../views/user/add'], resolve)
+          require(['../views/staff/add'], resolve)
         }
       },
       {
-        path: 'user/list',
+        path: 'staff/list',
         name: '员工列表',
         component: (resolve) => {
-          require(['../views/user/list'], resolve)
+          require(['../views/staff/list'], resolve)
         }
       },
       {
-        path: 'medical/list ',
+        path: 'medical/list',
         name: '药品库存列表',
         component: (resolve) => {
           require(['../views/medical/list'], resolve)
@@ -54,6 +54,20 @@ export default [
         name: '药品出库',
         component: (resolve) => {
           require(['../views/medical/out'], resolve)
+        }
+      },
+      {
+        path: 'customer/list',
+        name: '客户列表',
+        component: resolve => {
+          require(['../views/customer/list'], resolve)
+        }
+      },
+      {
+        path: 'customer/add',
+        name: '添加客户',
+        component: resolve => {
+          require(['../views/customer/add'], resolve)
         }
       }
     ]

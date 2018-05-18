@@ -1,10 +1,16 @@
 <template>
   <el-container>
-    <aside-bar></aside-bar>
+    <header-bar :userName="userInfo.userName"></header-bar>
     <el-container class="main-container">
-      <header-bar></header-bar>
-      <el-main>
-        <router-view/>
+      <aside-bar></aside-bar>
+
+      <el-main class="content">
+        <div class="operation">
+          <h2 class="title"><i class="el-icon-star-on title-icon"></i>{{$route.name}}</h2>
+        </div>
+        <div class="operation">
+          <router-view/>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -17,13 +23,22 @@ import HeaderBar from 'components/header'
 export default {
   data () {
     return {
-      userName: ''
+      userInfo: {}
     }
   },
   created () {
     const userInfo = window.localStorage.getItem('userInfo')
+
     if (userInfo) {
-      this.setUserInfo(JSON.parse(userInfo))
+      this.userInfo = JSON.parse(userInfo)
+    } else {
+      this.$message({
+        message: '你没有登录哦',
+        type: 'error'
+      })
+      setTimeout(() => {
+        this.$router.push('/login')
+      }, 1000)
     }
   },
   methods: {
@@ -38,6 +53,18 @@ export default {
 
 <style lang="less" scoped>
 .main-container {
-  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f5f5;
+}
+.content {
+  padding: 65px 20px 20px;
+}
+.title {
+  font-size: 18px;
+  font-weight: 500;
+  &-icon {
+    margin-right: 10px;
+    color: gold;
+  }
 }
 </style>

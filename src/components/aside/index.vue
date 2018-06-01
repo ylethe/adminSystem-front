@@ -62,7 +62,7 @@ export default {
 
 <style>
 .aside-wrap {
-  position: fixed;
+  position: absolute;
   top: 80px;
   left: 10px;
   width: 200px;

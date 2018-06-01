@@ -42,11 +42,14 @@ export default {
   methods: {
     getList () {
       this.$api.getOutList().then(res => {
-        this.lists = res.data
-        this.lists.forEach(v => {
+        let arr = res.data
+        arr.forEach(v => {
           v.productionDate = v.productionDate.split('T')[0]
           v.outDate = v.outDate.split('T')[0]
         })
+        const result = this.$setPagination(arr, this.pagination)
+        this.lists = result.list
+        this.pagination.total = result.total
       })
     },
     handleSizeChange (val) {

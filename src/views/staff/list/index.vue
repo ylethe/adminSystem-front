@@ -56,7 +56,13 @@ export default {
     // 获取员工列表
     getList () {
       this.$api.getStaffList().then(res => {
-        this.lists = res.data
+        let arr = res.data
+        arr.forEach(v => {
+          v.joinDate = v.joinDate.split('T')[0]
+        })
+        const result = this.$setPagination(arr, this.pagination)
+        this.lists = result.list
+        this.pagination.total = result.total
       }).catch(err => {
         console.log(err)
       })

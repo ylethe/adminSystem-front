@@ -56,7 +56,22 @@ export default {
         search: this.search,
         pagination: this.pagination
       }).then(res => {
-        this.lists = res.data
+        console.log(this.search.name, this.search.tel)
+        const arr = res.data.filter(v => {
+          if (!this.search.name && !this.search.tel) {
+            return v
+          }
+          if (!this.search.tel && this.search.name) {
+            return v.name === this.search.name
+          }
+          if (this.search.tel && !this.search.name) {
+            return v.tel === this.search.tel
+          }
+          return (v.name === this.search.name) && (v.tel === this.search.tel)
+        })
+        const result = this.$setPagination(arr, this.pagination)
+        this.lists = result.list
+        this.pagination.total = result.total
       })
     },
     handleSizeChange (val) {

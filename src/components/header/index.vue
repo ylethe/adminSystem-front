@@ -6,27 +6,27 @@
       <el-dropdown>
         <i class="el-icon-arrow-down icon"></i>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
-          <el-dropdown-item @click="modifyPassword">修改密码</el-dropdown-item>
+          <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
+          <el-dropdown-item @click.native="modifyPassword">修改密码</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <el-dialog>
-      <el-form>
-        <el-form-item label="旧密码">
+    <el-dialog :visible.sync="visible" width="35%">
+      <el-form ref="form" :model="postData" :rules="rules" label-width="100px">
+        <el-form-item label="旧密码" prop="password">
           <el-input type="password" v-model="postData.password"></el-input>
         </el-form-item>
-        <el-form-item label="新密码">
+        <el-form-item label="新密码" prop="newPassword">
           <el-input type="password" v-model="postData.newPassword"></el-input>
         </el-form-item>
-        <el-form-item label="再次输入新密码">
+        <el-form-item label="确认密码" prop="reNewpassword" required>
           <el-input type="password" v-model="postData.reNewpassword"></el-input>
         </el-form-item>
-        <template slot="footer">
-          <el-button type="primary">重置</el-button>
-          <el-button>取消</el-button>
-        </template>
       </el-form>
+      <div slot="footer">
+        <el-button type="primary" @click="reset">重置</el-button>
+        <el-button>取消</el-button>
+      </div>
     </el-dialog>
   </el-header>
 </template>
@@ -37,11 +37,26 @@ export default {
     userName: String
   },
   data () {
+    const validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.postData.pass) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
     return {
       postData: {
         password: '',
         newPassword: '',
         reNewPassword: ''
+      },
+      visible: false,
+      rules: {
+        password: [{required: true, message: '旧密码不能为空'}],
+        newPassword: [{required: true, message: '新密码不能为空'}],
+        reNewpassword: [{validator: validatePass, trigger: 'blur'}]
       }
     }
   },
@@ -51,7 +66,26 @@ export default {
       this.$router.push('/login')
     },
     modifyPassword () {
-
+      this.visible = true
+    },
+    reset () {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          this.$api.resetPassword(this.postData).then(() => {
+            this.$message({
+              message: '修改密码成功，　请重新登录',
+              type: 'success'
+            })
+            this.visible = false
+            this.$router.push('/login')
+          }).catch((err) => {
+            this.$message({
+              message: err.msg,
+              type: 'error'
+            })
+          })
+        }
+      })
     }
   }
 }

@@ -47,6 +47,7 @@ export default {
         })
         return
       }
+      window.localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
       this.$api.login(this.userInfo).then(res => {
         this.$message({
           message: res.msg,

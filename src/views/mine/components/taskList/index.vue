@@ -33,7 +33,8 @@ export default {
       userInfo: {},
       pagination: {
         current: 1,
-        total: 6
+        size: 5,
+        total: 0
       }
     }
   },
@@ -47,7 +48,14 @@ export default {
       this.$api.getTask({
         userId: this.userInfo.userId
       }).then(res => {
-        this.tasks = res.data
+        let arr = res.data
+        arr.forEach(v => {
+          v.startDate = v.startDate.split('T')[0]
+          v.endDate = v.endDate.split('T')[0]
+        })
+        const result = this.$setPagination(arr, this.pagination)
+        this.tasks = result.list
+        this.pagination.total = result.total
       }).catch(err => {
         this.$message({
           message: err.msg,

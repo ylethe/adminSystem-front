@@ -77,10 +77,13 @@ export default {
   methods: {
     getList () {
       this.$api.getMedicalList().then(res => {
-        this.lists = res.data
-        this.lists.forEach(v => {
+        let arr = res.data
+        arr.forEach(v => {
           v.productionDate = v.productionDate.split('T')[0]
         })
+        const result = this.$setPagination(arr, this.pagination)
+        this.lists = result.list
+        this.pagination.total = result.total
       })
     },
     medicalOut (data) {
@@ -118,7 +121,7 @@ export default {
         productionDate: this.outData.productionDate,
         medicalType: this.outData.medicalType,
         outDate: this.form.date,
-        outCout: this.form.count,
+        outCount: this.form.count,
         count: this.outData.count - this.form.count
       }).then(() => {
         this.$message({

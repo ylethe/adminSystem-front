@@ -7,11 +7,13 @@ import api from './api'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '../static/css/index.less'
+import setPagination from './utils/setPagination'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
 Vue.prototype.$api = api
+Vue.prototype.$setPagination = setPagination
 
 /* eslint-disable no-new */
 new Vue({

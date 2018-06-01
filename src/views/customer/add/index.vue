@@ -25,6 +25,7 @@
       <el-upload
         class="upload-content"
         action="uploadLink"
+        :http-request=upqiniu
         multiple
         :limit="limit"
         :on-success="uploadSuccess">
@@ -32,7 +33,7 @@
         <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
       </el-upload>
       <div class="img-lists">
-        <img :src="l" v-for="(l, index) in add.lifePhoto" :key="index"/>
+        <img :src="add.lifePhoto"/>
       </div>
     </el-form-item>
     <el-form-item>
@@ -53,11 +54,12 @@ export default {
         address: '',
         birthday: '',
         comment: '',
-        lifePhoto: []
+        lifePhoto: ''
       },
       submitText: '添加',
-      uploadLink: '',
-      limit: 5,
+      uploadLink: 'https://upload-z1.qiniup.com',
+      qiniuaddr: 'oia85104s.bkt.clouddn.com',
+      limit: 1,
       rules: {
         name: [
           {required: true, message: '姓名不能为空'}
@@ -106,7 +108,7 @@ export default {
           this.$api.updateCustomer(this.add).then(() => {
             this.$message({
               message: '请求成功',
-              type: 'error'
+              type: 'success'
             })
           }).catch(err => {
             this.$message({
@@ -115,6 +117,39 @@ export default {
             })
           })
         }
+      })
+    },
+    upqiniu (req) {
+      console.log(req)
+      const config = {
+        headers: {'Content-Type': 'multipart/form-data'}
+      }
+      let filetype = ''
+      if (req.file.type === 'image/png') {
+        filetype = 'png'
+      } else {
+        filetype = 'jpg'
+      }
+      // 重命名要上传的文件
+      const keyname = 'lethe' + Math.floor(Math.random() * 100) + '.' + filetype
+      // 从后端获取上传凭证token
+      this.$api.token().then(res => {
+        console.log(res)
+        const formdata = new FormData()
+        formdata.append('file', req.file)
+        formdata.append('token', res.data)
+        formdata.append('key', keyname)
+        // 获取到凭证之后再将文件上传到七牛云空间
+        this.$api.upload(formdata, config).then(res => {
+          const imgUrl = 'http://' + this.qiniuaddr + '/' + res.key
+          console.log(imgUrl, 111)
+        }).catch(err => {
+          console.log(err, 333)
+          const imgUrl = 'http://' + this.qiniuaddr + '/' + err.key
+          this.formData.lifePhoto = imgUrl
+        })
+      }).catch(err => {
+        console.log(err, 222)
       })
     }
   }

@@ -8,6 +8,7 @@
           class="upload-content"
           :action="uploadLink"
           :show-file-list="false"
+          :http-request=upqiniu
           :on-success="uploadSuccess"
           accept="image/png, image/jpeg">
           <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
@@ -25,14 +26,19 @@
       <input type="text" class="input" placeholder="请填写性别" v-model="formData.sex" @focus="showSexIcon = true" @blur="showSexIcon = false"/>
       <i class="el-icon-edit editor-icon" v-show="showSexIcon"></i>
     </li>
-    <li class="item">
+     <li class="item">
       <span class="title">联系方式</span>
       <input type="text" class="input" placeholder="请填写联系方式" v-model="formData.tel" @focus="showTelIcon = true" @blur="showTelIcon = false"/>
       <i class="el-icon-edit editor-icon" v-show="showTelIcon"></i>
     </li>
     <li class="item">
+      <span class="title">加入日期</span>
+      <input type="text" class="input" placeholder="请填写加入日期" v-model="formData.joinDate" @focus="showDateIcon = true" @blur="showDateIcon = false"/>
+      <i class="el-icon-edit editor-icon" v-show="showDateIcon"></i>
+    </li>
+    <li class="item">
       <span class="title">职业</span>
-      <input type="text" class="input" placeholder="请填写职业" v-model="formData.occupation" @focus="showOccupationIcon = true" @blur="showOccupationIcon = false"/>
+      <input type="text" class="input" placeholder="请填写职业" v-model="formData.post" @focus="showOccupationIcon = true" @blur="showOccupationIcon = false"/>
       <i class="el-icon-edit editor-icon" v-show="showOccupationIcon"></i>
     </li>
     <li class="item">
@@ -56,15 +62,18 @@ export default {
         userName: '木易',
         sex: '女',
         tel: '18716037958',
-        occupation: '前端开发工程师',
+        post: '前端开发工程师',
+        joinDate: '2012-09-08',
         comment: '爱打游戏，吃鸡农药都行；喜欢夜跑，吃饭一定要吃辣'
       },
       userInfo: {},
-      uploadLink: '',
+      uploadLink: 'https://upload-z1.qiniup.com',
+      qiniuaddr: 'oia85104s.bkt.clouddn.com',
       showNameIcon: false,
       showSexIcon: false,
       showTelIcon: false,
       showOccupationIcon: false,
+      showDateIcon: false,
       showIntroduceIcon: false
     }
   },
@@ -82,6 +91,9 @@ export default {
         id: this.userInfo.userId
       }).then(res => {
         console.log(res.data)
+        this.formData = res.data
+        this.formData.joinDate = this.formData.joinDate.split('T')[0]
+        this.formData.lifePhoto = this.formData.lifePhoto || 'http://oia85104s.bkt.clouddn.com/head-pic.jpeg'
       }).catch(err => {
         this.$message({
           message: err.msg,
@@ -90,14 +102,58 @@ export default {
       })
     },
     conserve () {
-      if (!this.userInfo.userName) {
+      if (!this.formData.userName) {
         this.$message({
           message: '姓名为必填项哦',
           type: 'warning'
         })
         return
       }
-      console.log(this.userInfo)
+      const data = {...this.formData, id: this.userInfo.userId}
+      this.$api.updateStaffInfo(data).then(() => {
+        this.$message({
+          message: '保存成功',
+          type: 'success'
+        })
+      }).catch(err => {
+        this.$message({
+          message: err.msg,
+          type: 'error'
+        })
+      })
+    },
+    upqiniu (req) {
+      console.log(req)
+      const config = {
+        headers: {'Content-Type': 'multipart/form-data'}
+      }
+      let filetype = ''
+      if (req.file.type === 'image/png') {
+        filetype = 'png'
+      } else {
+        filetype = 'jpg'
+      }
+      // 重命名要上传的文件
+      const keyname = 'lethe' + Math.floor(Math.random() * 100) + '.' + filetype
+      // 从后端获取上传凭证token
+      this.$api.token().then(res => {
+        console.log(res)
+        const formdata = new FormData()
+        formdata.append('file', req.file)
+        formdata.append('token', res.data)
+        formdata.append('key', keyname)
+        // 获取到凭证之后再将文件上传到七牛云空间
+        this.$api.upload(formdata, config).then(res => {
+          const imgUrl = 'http://' + this.qiniuaddr + '/' + res.key
+          console.log(imgUrl, 111)
+        }).catch(err => {
+          console.log(err, 333)
+          const imgUrl = 'http://' + this.qiniuaddr + '/' + err.key
+          this.formData.lifePhoto = imgUrl
+        })
+      }).catch(err => {
+        console.log(err, 222)
+      })
     }
   }
 }
